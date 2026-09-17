@@ -10,6 +10,7 @@ import { createTimelineUI } from './timeline-ui.js';
 // of a 10s cycle), which is what makes a seamless loop export possible.
 const LOOP_TIME = 10 / 3;
 const STORAGE_KEY = 'heatmap-studio.v1';
+const DEFAULT_SHAPE = './assets/Logo.svg';
 
 const PARAM_CONTROLS = [
   { key: 'angle', label: 'Angle', min: 0, max: 360, step: 1, format: 'deg', hard: [0, 360] },
@@ -72,7 +73,7 @@ const DEFAULTS = {
   keyframes: {},
   timelineDuration: 0, // 0 = follow the shader's own loop length
   timelineCollapsed: false,
-  theme: 'auto',
+  theme: 'dark',
   ssaa: 2,
   motionSamples: 1,
   shutter: 180,
@@ -157,7 +158,7 @@ let rafHandle = 0;
 let exporting = false;
 let cancelRequested = false;
 let sourceImage = null;
-let sourceName = 'Default shape';
+let sourceName = 'Logo.svg';
 let previewSize = { width: 16, height: 9 };
 let timelineUI = null;
 let timeMap = null;
@@ -911,7 +912,11 @@ function loadSaved() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    return typeof parsed === 'object' && parsed ? parsed : {};
+    if (!parsed || typeof parsed !== 'object') return {};
+    // 'auto' was the old default and the toggle never writes it, so a stored
+    // 'auto' is a leftover rather than a choice — let the dark default win.
+    if (parsed.theme === 'auto') delete parsed.theme;
+    return parsed;
   } catch {
     return {};
   }
@@ -1218,8 +1223,8 @@ async function boot() {
   rafHandle = requestAnimationFrame(tick);
 
   try {
-    const image = await loadImage('./assets/default-shape.svg');
-    await applyImage(image, './assets/default-shape.svg');
+    const image = await loadImage(DEFAULT_SHAPE);
+    await applyImage(image, DEFAULT_SHAPE);
   } catch {
     setStatus('Default shape failed to load — drop an image to start.', 'error');
   }
