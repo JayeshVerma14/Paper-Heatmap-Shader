@@ -21,6 +21,30 @@ curl -o vendor/webm-muxer.js https://cdn.jsdelivr.net/npm/webm-muxer@5.1.4/build
 Then open <http://localhost:5178> — Chrome or Edge (the export needs WebCodecs).
 No install, no build step, no dependencies.
 
+## Deploying
+
+The app lives in `heatmap-studio/`, but Vercel serves the repository root, where
+there is no `index.html` — so an out-of-the-box deploy returns 404 on every path.
+`vercel.json` at the root fixes that by rewriting everything into the subfolder:
+
+```json
+{
+  "rewrites": [
+    { "source": "/", "destination": "/heatmap-studio/index.html" },
+    { "source": "/:path*", "destination": "/heatmap-studio/:path*" }
+  ]
+}
+```
+
+Rewrites are evaluated after the filesystem check, so real files still serve
+directly and only the unmatched paths get redirected into the subfolder. The
+equivalent without any config is to set **Root Directory → `heatmap-studio`** in
+the Vercel project settings; either works, not both needed.
+
+Nothing is built or bundled, so the project needs no build command and no install
+step — Vercel just serves the files. The export needs a secure context, which
+HTTPS on Vercel provides.
+
 ## How the effect works
 
 The shader never reads your image directly. On load, the image is composited onto a

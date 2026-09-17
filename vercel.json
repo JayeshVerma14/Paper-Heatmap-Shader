@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/heatmap-studio/index.html" },
+    { "source": "/:path*", "destination": "/heatmap-studio/:path*" }
+  ]
+}
