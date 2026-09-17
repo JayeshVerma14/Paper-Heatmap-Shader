@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "heatmap-studio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/jayes/Downloads/Syntax Error Branding Shader/heatmap-studio/serve.mjs",
+        "5178"
+      ],
+      "port": 5178
+    }
+  ]
+}

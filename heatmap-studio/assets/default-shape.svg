@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1164" height="524" viewBox="0 0 1164 524">
+  <!-- Isometric overlapping cubes: a stand-in for the shape you drop in.
+       Luminance is what drives the shader, so the faces are three dark steps:
+       side walls darkest, top face lightest, hole walls in between. -->
+  <g>
+    <!-- left slab: side walls -->
+    <path d="M40 230 L330 375 L620 230 L620 274 L330 419 L40 274 Z" fill="#0c0c16" />
+    <!-- left slab: top face with a diamond hole -->
+    <path
+      d="M40 230 L330 85 L620 230 L330 375 Z M258 230 L330 194 L402 230 L330 266 Z"
+      fill="#22223a"
+      fill-rule="evenodd"
+    />
+    <!-- left hole: inner wall -->
+    <path d="M258 230 L330 194 L402 230 L402 252 L330 216 L258 252 Z" fill="#171728" />
+  </g>
+  <g>
+    <!-- right slab: side walls -->
+    <path d="M544 230 L834 375 L1124 230 L1124 274 L834 419 L544 274 Z" fill="#0c0c16" />
+    <!-- right slab: top face with a diamond hole -->
+    <path
+      d="M544 230 L834 85 L1124 230 L834 375 Z M762 230 L834 194 L906 230 L834 266 Z"
+      fill="#22223a"
+      fill-rule="evenodd"
+    />
+    <!-- right hole: inner wall -->
+    <path d="M762 230 L834 194 L906 230 L906 252 L834 216 L762 252 Z" fill="#171728" />
+  </g>
+</svg>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Heatmap Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#panel">Skip to controls</a>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <h1>Heatmap Studio</h1>
+      </div>
+      <p class="tagline">Paper&rsquo;s heatmap shader, rendered locally and exported frame&#8209;exact.</p>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-icon" id="themeBtn" aria-label="Switch to dark theme" title="Theme">
+          <span id="themeIcon" aria-hidden="true">☾</span>
+        </button>
+        <button type="button" class="btn" id="resetBtn">Reset</button>
+        <button type="button" class="btn" id="stillBtn">Export still</button>
+        <button type="button" class="btn btn-primary" id="exportBtn">Export video</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage" aria-label="Preview">
+        <div class="stage-inner">
+          <div class="frame" id="frame">
+            <canvas id="canvas"></canvas>
+            <div class="frame-busy" id="frameBusy" hidden>Processing shape&hellip;</div>
+          </div>
+          <div class="transport">
+            <button type="button" class="btn btn-round" id="playBtn" aria-label="Pause">
+              <span id="playIcon">Pause</span>
+            </button>
+            <input
+              type="range"
+              id="scrub"
+              class="scrub"
+              min="0"
+              max="1000"
+              value="0"
+              aria-label="Position in loop"
+            />
+            <span class="transport-meta">
+              <span id="timeLabel">0.00s</span>
+              <span class="dot" aria-hidden="true">&middot;</span>
+              <span id="loopLabel">loop 5.46s</span>
+              <span class="dot" aria-hidden="true">&middot;</span>
+              <span id="sizeLabel">3840 &times; 2160</span>
+            </span>
+          </div>
+
+          <section class="timeline" aria-label="Timeline">
+            <div class="tl-head">
+              <button type="button" class="tl-toggle" id="tlToggle" aria-expanded="true">
+                <span class="tl-caret" aria-hidden="true">▾</span>
+                <h2>Timeline</h2>
+              </button>
+              <label class="tl-length">
+                <span class="field-label">Length</span>
+                <input type="number" id="tlDuration" class="num num-sm" min="0.2" max="600" step="0.01" />
+              </label>
+              <button type="button" class="btn btn-sm" id="tlClear">Clear keys</button>
+            </div>
+            <div id="timelineBody"></div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="panel" id="panel" aria-label="Controls">
+        <div class="group">
+          <h2>Shape</h2>
+          <div class="shape-row">
+            <div class="thumb" id="thumb"></div>
+            <div class="shape-meta">
+              <span class="shape-name" id="shapeName">Default shape</span>
+              <span class="shape-dims" id="shapeDims">1164 &times; 524</span>
+            </div>
+            <button type="button" class="btn btn-sm" id="pickImageBtn">Replace</button>
+          </div>
+          <label class="field">
+            <span class="field-label">Shape from</span>
+            <select id="shapeSource" class="select">
+              <option value="auto">Auto</option>
+              <option value="luma">Dark artwork</option>
+              <option value="alpha">Alpha channel</option>
+              <option value="invert">Light artwork</option>
+            </select>
+          </label>
+          <div id="shapeParams"></div>
+          <p class="hint" id="shapeHint">
+            Drop an image anywhere. PNG, SVG, WebP or JPG.
+          </p>
+          <input type="file" id="fileInput" accept="image/*" hidden />
+        </div>
+
+        <div class="group">
+          <h2>Parameters</h2>
+          <div id="params"></div>
+        </div>
+
+        <div class="group">
+          <h2>Foreground</h2>
+          <p class="hint">Top row is the hottest colour, bottom is the base glow.</p>
+          <div id="colorList" class="color-list"></div>
+          <div class="row-actions">
+            <button type="button" class="btn btn-sm" id="addColorBtn">Add colour</button>
+            <button type="button" class="btn btn-sm" id="flipColorsBtn">Flip order</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>Background</h2>
+          <div id="backgroundRow" class="color-list"></div>
+        </div>
+
+        <div class="group">
+          <h2>Layout</h2>
+          <label class="field">
+            <span class="field-label">Fit</span>
+            <select id="fit" class="select">
+              <option value="contain">Contain</option>
+              <option value="cover">Cover</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          <div id="layout"></div>
+        </div>
+
+        <div class="group">
+          <h2>Quality</h2>
+          <div class="field-pair">
+            <label class="field">
+              <span class="field-label">Supersampling</span>
+              <select id="ssaa" class="select">
+                <option value="1">1× · fast</option>
+                <option value="2" selected>2× · 4 samples</option>
+                <option value="3">3× · 9 samples</option>
+                <option value="4">4× · 16 samples</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Motion blur</span>
+              <select id="motionSamples" class="select">
+                <option value="1" selected>Off</option>
+                <option value="4">4 steps</option>
+                <option value="8">8 steps</option>
+                <option value="16">16 steps</option>
+                <option value="32">32 steps</option>
+              </select>
+            </label>
+          </div>
+          <div id="qualityParams"></div>
+          <p class="hint" id="qualityHint"></p>
+        </div>
+
+        <div class="group">
+          <h2>Export</h2>
+          <label class="field">
+            <span class="field-label">Resolution</span>
+            <select id="resPreset" class="select"></select>
+          </label>
+          <div class="field-pair" id="customSize" hidden>
+            <label class="field">
+              <span class="field-label">Width</span>
+              <input type="number" id="customW" class="num" min="16" max="7680" step="2" value="3840" />
+            </label>
+            <label class="field">
+              <span class="field-label">Height</span>
+              <input type="number" id="customH" class="num" min="16" max="7680" step="2" value="2160" />
+            </label>
+          </div>
+          <div class="field-pair">
+            <label class="field">
+              <span class="field-label">Frame rate</span>
+              <select id="fps" class="select">
+                <option value="24">24 fps</option>
+                <option value="30" selected>30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Duration</span>
+              <input type="number" id="duration" class="num" min="0.1" max="600" step="0.1" value="5.5" />
+            </label>
+          </div>
+          <label class="check">
+            <input type="checkbox" id="snapLoop" checked />
+            <span>Snap to a seamless loop</span>
+          </label>
+          <div class="field-pair">
+            <label class="field">
+              <span class="field-label">Format</span>
+              <select id="format" class="select">
+                <option value="mp4">MP4 &middot; H.264</option>
+                <option value="webm">WebM &middot; VP9</option>
+                <option value="png">PNG frames &middot; lossless</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Quality</span>
+              <select id="quality" class="select">
+                <option value="standard">Standard</option>
+                <option value="high" selected>High</option>
+                <option value="max">Max</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint" id="exportHint">3840 &times; 2160 &middot; 30 fps &middot; 165 frames</p>
+          <div class="progress" id="progress" hidden>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-meta">
+              <span id="progressLabel">Rendering&hellip;</span>
+              <button type="button" class="btn btn-sm" id="cancelBtn">Cancel</button>
+            </div>
+          </div>
+          <p class="status" id="status" role="status"></p>
+        </div>
+      </aside>
+    </main>
+
+    <div class="dropveil" id="dropveil" hidden><span>Drop to use as the shape</span></div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
